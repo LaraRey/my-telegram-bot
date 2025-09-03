@@ -1,5 +1,5 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+
 
 # Telegram ID администратора
 ADMIN_ID = 8072909779  # <- замени на свой ID
@@ -69,12 +69,20 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Запуск бота
 if __name__ == "__main__":
-    TOKEN = "8023291896:AAHLylZMF7pcTWkC_VfL6xFCztMkoxCsUy4"  # <- вставь сюда свой токен
-    app = ApplicationBuilder().token(TOKEN).build()
+    TOKEN = "8023291896:AAHLylZMF7pcTWkC_VfL6xFCztMkoxCsUy4"  # вставь токен твоего бота
+WEBHOOK_URL = "https://your-service-name.onrender.com/"  # замени на URL сервиса Render
 
-    # Обработчики
-    app.add_handler(CommandHandler("start_chat", start_chat))
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-    app.add_handler(CommandHandler("reply", reply))
+app = ApplicationBuilder().token(TOKEN).build()
 
-    app.run_polling()
+# Обработчики
+app.add_handler(CommandHandler("start", start))
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), forward_to_admin))
+app.add_handler(CommandHandler("reply", reply_to_user))
+
+# Запуск через webhook
+app.run_webhook(
+    listen="0.0.0.0",
+    port=10000,
+    url_path=TOKEN,
+    webhook_url=WEBHOOK_URL + TOKEN
+)
