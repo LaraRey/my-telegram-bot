@@ -1,11 +1,12 @@
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 # Telegram ID администратора
-ADMIN_ID = 8072909779  # <- замени на свой ID
+ADMIN_ID = 8072909779  # замени на свой Telegram ID
 
 # Словарь для хранения активных сессий пользователей
 active_chats = {}
+
 
 # Команда /start_chat — пользователь начинает диалог
 async def start_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -17,7 +18,8 @@ async def start_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Создаём новую сессию
     active_chats[user_id] = {"message": None}
-    await update.message.reply_text("Напиши сообщение, которое ты хочешь отправить администратору:")
+    await update.message.reply_text("Привет! Напиши сообщение, которое ты хочешь отправить администратору:")
+
 
 # Перехватываем текст от пользователя
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -40,10 +42,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("Сообщение отправлено администратору! Ожидайте ответа.")
 
+
 # Команда /reply — админ отвечает пользователю
 async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.from_user.id != ADMIN_ID:
-        return  # только админ
+        return  # только админ может отвечать
 
     if len(context.args) < 2:
         await update.message.reply_text("Использование: /reply <user_id> <сообщение>")
@@ -57,32 +60,36 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Сессия с этим пользователем неактивна.")
         return
 
-    # Отправка сообщения пользователю
+    # Отправка ответа пользователю
     await context.bot.send_message(chat_id=user_id, text=reply_text)
 
     # Уведомление пользователя о закрытии сессии
-    await context.bot.send_message(chat_id=user_id, text="Сессия с администратором завершена. Чтобы написать снова, используй /start_chat.")
+    await context.bot.send_message(
+        chat_id=user_id,
+        text="Сессия с администратором завершена. Чтобы написать снова, используй /start_chat."
+    )
 
     # Закрываем сессию
     del active_chats[user_id]
     await update.message.reply_text(f"Сообщение отправлено пользователю {user_id}, сессия закрыта.")
 
-# Запуск бота
+
+# 🚀 Основная точка входа
 if __name__ == "__main__":
-    TOKEN = "8023291896:AAHLylZMF7pcTWkC_VfL6xFCztMkoxCsUy4"  # вставь токен твоего бота
-WEBHOOK_URL = "https://your-service-name.onrender.com/"  # замени на URL сервиса Render
+    TOKEN = "8023291896:AAHLylZMF7pcTWkC_VfL6xFCztMkoxCsUy4"  # токен твоего бота
+    WEBHOOK_URL = "https://your-service-name.onrender.com/"  # замени на URL сервиса Render
 
-app = ApplicationBuilder().token(TOKEN).build()
+    app = ApplicationBuilder().token(TOKEN).build()
 
-# Обработчики
-app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), forward_to_admin))
-app.add_handler(CommandHandler("reply", reply_to_user))
+    # Обработчики команд
+    app.add_handler(CommandHandler("start_chat", start_chat))
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    app.add_handler(CommandHandler("reply", reply))
 
-# Запуск через webhook
-app.run_webhook(
-    listen="0.0.0.0",
-    port=10000,
-    url_path=TOKEN,
-    webhook_url=WEBHOOK_URL + TOKEN
-)
+    # Запуск через webhook
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=10000,
+        url_path=TOKEN,
+        webhook_url=WEBHOOK_URL + TOKEN
+    )
