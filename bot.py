@@ -61,19 +61,19 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Запуск
 if __name__ == "__main__":
     TOKEN = "8023291896:AAHLylZMF7pcTWkC_VfL6xFCztMkoxCsUy4"  # токен бота
-    WEBHOOK_URL = "https://my-telegram-bot-16-791m.onrender.com"  # ⚡ замени на адрес своего сервиса в Render
+    WEBHOOK_URL = "https://my-telegram-bot-16-791m.onrender.com"  # адрес Render
 
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # Обработчики
     app.add_handler(CommandHandler("start_chat", start_chat))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-app.add_handler(CommandHandler("reply", reply))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(CommandHandler("reply", reply))
 
-
-    WEBHOOK_URL = "https://my-telegram-bot-16-791m.onrender.com"
-app.run_webhook(
-    listen="0.0.0.0",
-    port=10000,
-    url_path=TOKEN,
-    webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
-)
+    # Запуск через webhook
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=10000,
+        url_path=TOKEN,
+        webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
+    )
