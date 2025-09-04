@@ -71,9 +71,9 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("reply", reply))
 
     # Webhook запуск
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=10000,
-        url_path=TOKEN,
-        webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
-    )
+app.run_webhook(
+    listen="0.0.0.0",
+    port=10000,
+    url_path=TOKEN,
+    webhook_url=f"https://my-telegram-bot-15-791m.onrender.com/{TOKEN}"
+)
